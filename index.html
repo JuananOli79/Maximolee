@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MaximoLee">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>MaximoLee ⚽</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --red:#C60B1E;--red-dark:#8b000f;
+  --yellow:#FFC400;--yellow-dark:#c49400;
+  --green:#27ae60;--green-dark:#1a7a40;
+  --blue:#003DA5;--blue-light:#f0f5ff;
+  --white:#fff;--bg:#f5f0ff;--gray:#888;
+  --text:#1a1a2e;--card-sh:0 4px 20px rgba(0,0,0,.1);
+}
+html,body{height:100%;overflow:hidden;
+  font-family:-apple-system,'SF Pro Rounded','Helvetica Neue',Arial,sans-serif;
+  background:var(--bg);color:var(--text);
+  user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+#app{height:100vh;overflow:hidden;position:relative;}
+.screen{height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:50px;}
+
+/* ANIMATIONS */
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-9px)}80%{transform:translateX(9px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{0%{transform:scale(0);opacity:0}60%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes starPop{0%{transform:scale(0) rotate(-40deg);opacity:0}65%{transform:scale(1.35)}100%{transform:scale(1);opacity:1}}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 rgba(255,196,0,0)}50%{box-shadow:0 0 20px rgba(255,196,0,.6)}}
+
+/* HEADER */
+.hdr{background:var(--red);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.22);}
+.hdr-title{color:#fff;font-size:21px;font-weight:800;letter-spacing:.8px;}
+.hdr-score{background:var(--yellow);color:var(--text);padding:5px 14px;border-radius:50px;font-size:17px;font-weight:900;display:flex;align-items:center;gap:5px;}
+.hdr-back{background:rgba(255,255,255,.18);border:none;color:#fff;font-size:22px;width:44px;height:44px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.hdr-back:active{background:rgba(255,255,255,.38);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:15px 30px;border-radius:50px;border:none;font-family:inherit;font-size:19px;font-weight:800;cursor:pointer;min-height:56px;letter-spacing:.4px;transition:transform .1s,box-shadow .1s;touch-action:manipulation;}
+.btn:active{transform:scale(0.95);}
+.btn-full{width:100%;}
+.btn-red{background:var(--red);color:#fff;box-shadow:0 5px 0 var(--red-dark);}
+.btn-red:active{box-shadow:0 2px 0 var(--red-dark);transform:translateY(3px) scale(1);}
+.btn-yellow{background:var(--yellow);color:var(--text);box-shadow:0 5px 0 var(--yellow-dark);}
+.btn-yellow:active{box-shadow:0 2px 0 var(--yellow-dark);transform:translateY(3px) scale(1);}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 5px 0 var(--green-dark);}
+.btn-green:active{box-shadow:0 2px 0 var(--green-dark);transform:translateY(3px) scale(1);}
+.btn-gray{background:#ddd;color:#aaa;box-shadow:0 5px 0 #bbb;pointer-events:none;}
+.btn-outline-w{background:transparent;color:#fff;border:3px solid #fff;box-shadow:none;}
+.btn-outline-w:active{background:rgba(255,255,255,.15);}
+
+/* PROGRESS BAR */
+.prog-wrap{background:#ddd;border-radius:50px;height:13px;overflow:hidden;flex:1;}
+.prog-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--yellow),var(--red));transition:width .45s ease;}
+.prog-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.prog-label{font-size:15px;font-weight:700;color:var(--gray);white-space:nowrap;}
+
+/* EXERCISE CONTAINER */
+.ex-wrap{padding:18px 18px 90px;}
+
+/* QUESTION BOX */
+.q-box{background:#fff;border-radius:20px;padding:20px;margin-bottom:18px;box-shadow:var(--card-sh);animation:fadeUp .3s ease;}
+.q-emoji{font-size:46px;text-align:center;display:block;margin-bottom:10px;}
+.q-text{font-size:21px;font-weight:700;line-height:1.55;color:var(--text);}
+.q-hint{font-size:15px;color:var(--gray);font-weight:600;margin-top:6px;}
+
+/* OPTIONS */
+.opt-list{display:flex;flex-direction:column;gap:11px;}
+.opt{width:100%;background:#fff;border:3px solid #e0e0e0;border-radius:15px;padding:17px 22px;font-family:inherit;font-size:19px;font-weight:700;cursor:pointer;text-align:left;color:var(--text);transition:border-color .15s,background .15s;}
+.opt:active{transform:scale(.98);}
+.opt-ok{border-color:var(--green)!important;background:#f0fff4!important;color:var(--green)!important;animation:popIn .3s ease;}
+.opt-no{border-color:var(--red)!important;background:#fff5f5!important;color:var(--red)!important;animation:shake .4s ease;}
+.opt-off{pointer-events:none;opacity:.55;}
+
+/* FEEDBACK BANNER */
+.fb{border-radius:15px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:11px;animation:fadeUp .3s ease;}
+.fb-ok{background:#f0fff4;border:2px solid var(--green);}
+.fb-no{background:#fff5f5;border:2px solid var(--red);}
+.fb-emoji{font-size:26px;}
+.fb-text{font-size:17px;font-weight:800;}
+.fb-text-ok{color:var(--green);}
+.fb-text-no{color:var(--red);}
+
+/* HOME */
+.home-bg{min-height:100vh;background:linear-gradient(160deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding-bottom:40px;}
+.flag-bar{height:8px;background:linear-gradient(90deg,var(--red) 33%,var(--yellow) 33% 66%,var(--red) 66%);}
+.home-hero{padding:28px 22px 16px;text-align:center;}
+.home-ball{font-size:78px;animation:bounce 2s infinite;display:block;filter:drop-shadow(0 4px 14px rgba(255,196,0,.4));}
+.home-title{color:var(--yellow);font-size:40px;font-weight:900;margin-top:6px;text-shadow:0 3px 12px rgba(0,0,0,.4);letter-spacing:2px;}
+.home-sub{color:rgba(255,255,255,.75);font-size:19px;margin-top:5px;font-weight:600;}
+.stats-row{display:flex;gap:11px;padding:0 20px 18px;}
+.stat-box{flex:1;background:rgba(255,255,255,.1);border-radius:15px;padding:13px 7px;text-align:center;}
+.stat-num{color:var(--yellow);font-size:28px;font-weight:900;line-height:1;}
+.stat-lbl{color:rgba(255,255,255,.65);font-size:12px;font-weight:800;margin-top:3px;text-transform:uppercase;letter-spacing:.4px;}
+.home-lvl-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:18px;margin:0 20px 18px;}
+.home-lvl-label{color:rgba(255,255,255,.6);font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;}
+.home-prog-sub{color:rgba(255,255,255,.5);font-size:13px;margin-top:5px;font-weight:600;}
+.players-row{display:flex;gap:11px;overflow-x:auto;padding:0 20px 4px;scrollbar-width:none;}
+.players-row::-webkit-scrollbar{display:none;}
+.p-card{flex-shrink:0;background:rgba(255,255,255,.09);border-radius:13px;padding:11px 13px;text-align:center;border:1px solid rgba(255,255,255,.13);}
+.p-card-em{font-size:27px;}
+.p-card-nm{color:#fff;font-size:12px;font-weight:800;margin-top:3px;white-space:nowrap;}
+.p-card-ps{color:var(--yellow);font-size:11px;font-weight:600;}
+.home-cta{padding:18px 20px 0;}
+.home-tip{color:rgba(255,255,255,.4);font-size:14px;text-align:center;margin-top:14px;padding:0 20px;}
+
+/* MENU */
+.menu-bg{min-height:100vh;background:var(--bg);}
+.menu-intro{padding:18px 18px 4px;text-align:center;}
+.menu-intro-title{font-size:22px;font-weight:900;color:var(--text);}
+.menu-intro-sub{font-size:14px;color:var(--gray);margin-top:3px;font-weight:600;}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 16px;}
+.m-card{background:#fff;border-radius:22px;padding:22px 14px;text-align:center;box-shadow:var(--card-sh);cursor:pointer;transition:transform .14s;position:relative;overflow:hidden;border:3px solid transparent;animation:fadeUp .4s ease both;}
+.m-card:active{transform:scale(.95);}
+.m-card-em{font-size:42px;margin-bottom:9px;display:block;}
+.m-card-title{font-size:17px;font-weight:900;margin-bottom:3px;}
+.m-card-desc{font-size:12px;color:var(--gray);font-weight:600;}
+.m-card-stars{margin-top:7px;font-size:14px;letter-spacing:2px;}
+.m-card-badge{position:absolute;top:9px;right:9px;background:var(--yellow);color:var(--text);border-radius:50px;padding:2px 7px;font-size:11px;font-weight:900;}
+.m-c1{border-color:#ff6b6b;background:linear-gradient(135deg,#fff5f5,#fff);}
+.m-c2{border-color:#ffd43b;background:linear-gradient(135deg,#fffbf0,#fff);}
+.m-c3{border-color:#74b9ff;background:linear-gradient(135deg,#f0f8ff,#fff);}
+.m-c4{border-color:#a29bfe;background:linear-gradient(135deg,#f8f5ff,#fff);}
+.m-c5{border-color:#55efc4;background:linear-gradient(135deg,#f0fff8,#fff);grid-column:1/-1;}
+
+/* LECTURA */
+.lect-card{background:#fff;border-radius:22px;overflow:hidden;box-shadow:var(--card-sh);margin-bottom:18px;animation:fadeUp .4s ease;}
+.lect-hdr{background:linear-gradient(135deg,var(--red),#e63946);padding:22px;text-align:center;}
+.lect-hdr-em{font-size:46px;margin-bottom:6px;}
+.lect-hdr-title{color:#fff;font-size:22px;font-weight:900;}
+.lect-body{padding:22px;font-size:19px;line-height:1.8;white-space:pre-line;color:var(--text);}
+
+/* COMPRENSION */
+.read-box{background:linear-gradient(135deg,#fff9f0,#fff);border-left:5px solid var(--yellow);border-radius:0 15px 15px 0;padding:18px;margin-bottom:18px;max-height:210px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.read-box p{font-size:18px;line-height:1.75;font-weight:600;color:var(--text);}
+.q-section-label{font-size:15px;font-weight:900;color:var(--red);text-transform:uppercase;letter-spacing:.9px;margin-bottom:9px;}
+
+/* ESCRITURA (LETTER TILES) */
+.slots-wrap{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;min-height:58px;padding:12px;background:rgba(0,0,0,.04);border-radius:14px;margin-bottom:20px;}
+.slot{width:43px;height:49px;border-radius:9px;border:3px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;background:#fff;cursor:pointer;transition:all .18s;color:var(--blue);}
+.slot.filled{border-style:solid;border-color:var(--blue);background:var(--blue-light);}
+.slot.s-ok{border-color:var(--green)!important;background:#f0fff4!important;color:var(--green)!important;}
+.slot.s-no{border-color:var(--red)!important;background:#fff5f5!important;color:var(--red)!important;}
+.tiles-wrap{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:18px;}
+.tile{width:47px;height:52px;border-radius:9px;border:3px solid #e0e0e0;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;cursor:pointer;box-shadow:0 3px 0 #ccc;transition:all .13s;color:var(--text);}
+.tile:active{transform:translateY(2px);box-shadow:0 1px 0 #ccc;}
+.tile.used{opacity:0;pointer-events:none;}
+
+/* ORDENAR */
+.sentence-area{min-height:64px;background:rgba(0,0,0,.04);border-radius:14px;padding:11px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:18px;}
+.sentence-placeholder{color:#ccc;font-weight:700;font-size:15px;}
+.wtoken{padding:9px 14px;border-radius:50px;font-size:17px;font-weight:700;cursor:pointer;transition:all .13s;}
+.wt-avail{background:#fff;border:2px solid #e0e0e0;color:var(--text);box-shadow:0 2px 0 #ccc;}
+.wt-avail:active{transform:scale(.96);}
+.wt-placed{background:var(--blue);color:#fff;border:2px solid #002a7a;}
+.wt-placed:active{transform:scale(.96);}
+.wt-hidden{opacity:0;pointer-events:none;}
+.wt-ok{background:var(--green)!important;color:#fff!important;border-color:var(--green-dark)!important;}
+.wt-no{background:var(--red)!important;color:#fff!important;border-color:var(--red-dark)!important;}
+.ordenar-btns{display:flex;gap:11px;}
+
+/* RESULTADO */
+.res-bg{min-height:100vh;background:linear-gradient(160deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center;}
+.res-em{font-size:76px;animation:bounce 1.2s infinite;}
+.res-title{color:var(--yellow);font-size:38px;font-weight:900;margin:14px 0 6px;}
+.res-sub{color:rgba(255,255,255,.8);font-size:19px;margin-bottom:22px;}
+.stars-row{display:flex;gap:12px;margin:0 0 20px;justify-content:center;}
+.star{font-size:50px;animation:starPop .5s ease both;}
+.star-off{opacity:.18;}
+.goles-badge{background:var(--yellow);color:var(--text);padding:11px 28px;border-radius:50px;font-size:26px;font-weight:900;margin-bottom:22px;}
+.score-detail{color:rgba(255,255,255,.7);font-size:17px;font-weight:700;margin-bottom:6px;}
+.fact-box{background:rgba(255,255,255,.09);border-radius:15px;padding:15px;margin:14px 0 22px;max-width:360px;width:100%;}
+.fact-label{color:var(--yellow);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
+.fact-text{color:rgba(255,255,255,.75);font-size:14px;font-style:italic;line-height:1.5;}
+.res-btns{display:flex;flex-direction:column;gap:11px;width:100%;max-width:340px;}
+
+/* CONFETTI */
+.cf{position:fixed;pointer-events:none;z-index:999;border-radius:2px;animation:confettiFall linear both;}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:22px;}
+.modal-box{background:#fff;border-radius:22px;padding:30px 22px;text-align:center;max-width:340px;width:100%;animation:fadeUp .3s ease;}
+.modal-em{font-size:56px;margin-bottom:11px;}
+.modal-title{font-size:26px;font-weight:900;margin-bottom:7px;}
+.modal-text{font-size:16px;color:var(--gray);margin-bottom:22px;line-height:1.5;}
+.modal-btns{display:flex;flex-direction:column;gap:11px;}
+
+@media(min-width:768px){
+  .menu-grid{grid-template-columns:repeat(3,1fr);padding:22px;}
+  .m-c5{grid-column:auto;}
+  .ex-wrap{max-width:580px;margin:0 auto;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ═══════════════════════════════════════
+   DATOS
+═══════════════════════════════════════ */
+const LECTURAS=[
+  {id:1,titulo:"La Selección Española",emoji:"🇪🇸",
+   texto:`España tiene una de las mejores selecciones de fútbol del mundo. Los jugadores visten una camiseta roja con el escudo de España en el pecho. Por eso les llaman "La Roja".
+
+España ha ganado muchos campeonatos importantes. En la Eurocopa de 2024, España ganó el torneo con grandes jugadores como Lamine Yamal, Pedri y Rodri.
+
+¡Los aficionados estaban muy contentos y celebraron por toda España!`},
+  {id:2,titulo:"Lamine Yamal, el prodigio",emoji:"⚡",
+   texto:`Lamine Yamal es un joven futbolista español que juega en el FC Barcelona y en la Selección de España.
+
+Juega de extremo derecho y es muy rápido con el balón. En la Eurocopa de 2024, marcó un gol increíble contra Francia en las semifinales. ¡Tenía solo 16 años!
+
+Todos dicen que Lamine es el futuro del fútbol español. Le encanta el fútbol desde que era muy pequeño.`},
+  {id:3,titulo:"El partido del sábado",emoji:"🏟️",
+   texto:`El sábado hay un partido muy importante. El equipo de Marcos juega contra los Leones. Marcos es el delantero centro y marca muchos goles.
+
+Cuando el partido empieza, los dos equipos corren muy rápido. En el minuto 20, Marcos recibe un pase de su amigo Tomás y chuta con fuerza. ¡GOL!
+
+El árbitro pita el final con el marcador de 2 a 1. ¡Han ganado el partido!`},
+  {id:4,titulo:"¡Campeones de Europa!",emoji:"🏆",
+   texto:`Era el 14 de julio de 2024. España jugaba la final de la Eurocopa contra Inglaterra en Berlín.
+
+El estadio estaba lleno de aficionados con camisetas rojas y amarillas. Mikel Oyarzabal marcó el gol de la victoria en el último momento.
+
+¡Todos los españoles celebraron y saltaron de alegría! España era campeona de Europa por cuarta vez.`},
+  {id:5,titulo:"Un día de entrenamiento",emoji:"👟",
+   texto:`Carlos es un niño de 8 años que adora el fútbol. Todos los martes y jueves tiene entrenamiento con su equipo.
+
+Se pone las botas, los pantalones cortos y la camiseta. El entrenador les enseña a pasar el balón y a chutar a puerta.
+
+Carlos practica mucho porque quiere ser como Pedri cuando sea mayor.`}
+];
+
+const COMPLETAR=[
+  {a:"El portero",h:"___________",d:"el balón con las manos.",opts:["coge","corre","chuta"],ok:"coge",em:"🧤"},
+  {a:"La camiseta de España es de color",h:"___________",d:".",opts:["roja","azul","verde"],ok:"roja",em:"👕"},
+  {a:"El árbitro pita cuando hay una",h:"___________",d:".",opts:["falta","carrera","canción"],ok:"falta",em:"🟡"},
+  {a:"Lamine Yamal juega en el FC",h:"___________",d:".",opts:["Barcelona","Madrid","Valencia"],ok:"Barcelona",em:"⚽"},
+  {a:"España ganó la Eurocopa en el año",h:"___________",d:".",opts:["2024","2020","2016"],ok:"2024",em:"🏆"},
+  {a:"El jugador chutó el balón a la",h:"___________",d:".",opts:["portería","tribuna","playa"],ok:"portería",em:"🥅"},
+  {a:"El delantero marcó un",h:"___________",d:"impresionante.",opts:["gol","error","partido"],ok:"gol",em:"🎯"},
+  {a:"Los jugadores corren por el",h:"___________",d:"de fútbol.",opts:["campo","patio","parque"],ok:"campo",em:"🌿"},
+  {a:"El capitán lleva un",h:"___________",d:"en el brazo.",opts:["brazalete","anillo","guante"],ok:"brazalete",em:"💪"},
+  {a:"España es",h:"___________",d:"de Europa.",opts:["campeona","segunda","eliminada"],ok:"campeona",em:"🇪🇸"},
+  {a:"La pelota entró en la",h:"___________",d:"después del disparo.",opts:["red","canasta","valla"],ok:"red",em:"⚽"},
+  {a:"El entrenador dio",h:"___________",d:"a los jugadores.",opts:["instrucciones","comida","premios"],ok:"instrucciones",em:"📋"},
+  {a:"Los aficionados gritan y",h:"___________",d:"cuando marca su equipo.",opts:["aplauden","duermen","lloran"],ok:"aplauden",em:"👏"},
+  {a:"El balón es",h:"___________",d:"y negro.",opts:["blanco","rojo","azul"],ok:"blanco",em:"⚽"},
+  {a:"Pedri juega en el",h:"___________",d:"del campo.",opts:["centro","córner","fondo"],ok:"centro",em:"🎯"}
+];
+
+const COMPRENSION=[
+  {titulo:"La Roja",emoji:"🇪🇸",
+   texto:"La Selección Española de fútbol, conocida como «La Roja», es uno de los equipos más exitosos del mundo. Sus jugadores visten una camiseta roja y pantalones azules. En los últimos años, han ganado tres Eurocopas y un Mundial. En 2024, ganaron la Eurocopa en Alemania, con Lamine Yamal como uno de los mejores jugadores del torneo.",
+   preguntas:[
+    {q:"¿Cómo se llama la Selección Española?",opts:["La Roja","El Equipo Verde","Los Leones","Los Toros"],ok:"La Roja"},
+    {q:"¿De qué color es la camiseta de España?",opts:["Roja","Azul","Verde","Amarilla"],ok:"Roja"},
+    {q:"¿Cuántos Mundiales ha ganado España?",opts:["Uno","Dos","Tres","Ninguno"],ok:"Uno"},
+    {q:"¿Dónde se celebró la Eurocopa de 2024?",opts:["Alemania","Francia","España","Italia"],ok:"Alemania"}
+   ]},
+  {titulo:"Pedro el Portero",emoji:"🧤",
+   texto:"Pedro tiene 8 años y va al entrenamiento todos los miércoles con su equipo. Su posición favorita es la de portero. Cuando para un penalti, sus compañeros le felicitan con fuerza. En el último partido, Pedro paró dos penaltis y su equipo ganó el torneo. El entrenador dijo que Pedro había jugado de maravilla.",
+   preguntas:[
+    {q:"¿Cuántos años tiene Pedro?",opts:["8","10","6","9"],ok:"8"},
+    {q:"¿Qué día va Pedro al entrenamiento?",opts:["Los miércoles","Los lunes","Los viernes","Los sábados"],ok:"Los miércoles"},
+    {q:"¿Cuál es la posición favorita de Pedro?",opts:["Portero","Delantero","Centrocampista","Defensa"],ok:"Portero"},
+    {q:"¿Cuántos penaltis paró en el último partido?",opts:["Dos","Uno","Tres","Cuatro"],ok:"Dos"}
+   ]},
+  {titulo:"Pedri",emoji:"🌟",
+   texto:"Pedri es un futbolista español nacido en Gran Canaria. Juega como centrocampista en el FC Barcelona y en la Selección Española. Es conocido por su habilidad con el balón y su visión de juego. Muchos expertos dicen que es el mejor jugador joven de España. Le gusta leer libros y escuchar música en su tiempo libre.",
+   preguntas:[
+    {q:"¿De dónde es Pedri?",opts:["Gran Canaria","Madrid","Barcelona","Sevilla"],ok:"Gran Canaria"},
+    {q:"¿En qué equipo juega Pedri?",opts:["FC Barcelona","Real Madrid","Sevilla","Atlético"],ok:"FC Barcelona"},
+    {q:"¿Cuál es la posición de Pedri?",opts:["Centrocampista","Portero","Delantero","Lateral"],ok:"Centrocampista"},
+    {q:"¿Qué hace Pedri en su tiempo libre?",opts:["Lee libros","Juega videojuegos","Cocina","Pinta cuadros"],ok:"Lee libros"}
+   ]}
+];
+
+const PALABRAS=[
+  {p:"pelota",   pista:"Con esto se juega al fútbol",         em:"⚽"},
+  {p:"portero",  pista:"El jugador que defiende la portería",  em:"🧤"},
+  {p:"arbitro",  pista:"El que pita las faltas en el partido", em:"🟡"},
+  {p:"camiseta", pista:"La ropa que llevan los jugadores",     em:"👕"},
+  {p:"estadio",  pista:"El lugar donde se juega el partido",   em:"🏟️"},
+  {p:"campeon",  pista:"El equipo que gana el torneo",         em:"🏆"},
+  {p:"goleador", pista:"El jugador que marca muchos goles",    em:"🎯"},
+  {p:"aficion",  pista:"Los fans que animan al equipo",        em:"📣"},
+  {p:"penalti",  pista:"Chute desde los once metros",          em:"🥅"},
+  {p:"jugador",  pista:"Persona que juega en el equipo",       em:"⚽"},
+  {p:"victoria", pista:"Cuando tu equipo gana el partido",     em:"🎉"},
+  {p:"disparo",  pista:"Cuando el jugador chuta con fuerza",   em:"💥"},
+  {p:"defensa",  pista:"El jugador que protege su portería",   em:"🛡️"},
+  {p:"bandera",  pista:"La enseña de cada país",               em:"🚩"},
+  {p:"balones",  pista:"Más de un balón",                      em:"⚽"}
+];
+
+const FRASES=[
+  {ws:["España","ganó","la","Eurocopa"],           f:"España ganó la Eurocopa"},
+  {ws:["El","portero","paró","el","penalti"],       f:"El portero paró el penalti"},
+  {ws:["Los","jugadores","corren","muy","rápido"],  f:"Los jugadores corren muy rápido"},
+  {ws:["Pedri","juega","en","Barcelona"],           f:"Pedri juega en Barcelona"},
+  {ws:["La","camiseta","de","España","es","roja"],  f:"La camiseta de España es roja"},
+  {ws:["El","árbitro","pitó","la","falta"],         f:"El árbitro pitó la falta"},
+  {ws:["Máximo","es","un","gran","futbolista"],     f:"Máximo es un gran futbolista"},
+  {ws:["El","balón","entró","en","la","portería"],  f:"El balón entró en la portería"},
+  {ws:["España","es","campeona","de","Europa"],     f:"España es campeona de Europa"},
+  {ws:["Yamal","marcó","un","gol","increíble"],     f:"Yamal marcó un gol increíble"},
+  {ws:["El","entrenador","explicó","la","jugada"],  f:"El entrenador explicó la jugada"},
+  {ws:["Los","aficionados","gritan","con","fuerza"],f:"Los aficionados gritan con fuerza"},
+  {ws:["El","delantero","chutó","a","puerta"],      f:"El delantero chutó a puerta"},
+  {ws:["El","equipo","entrenó","muy","bien"],       f:"El equipo entrenó muy bien"},
+  {ws:["Los","jugadores","celebraron","el","triunfo"],f:"Los jugadores celebraron el triunfo"}
+];
+
+const FUN_FACTS=[
+  "¡España ha ganado la Eurocopa 4 veces! Más que ningún otro país.",
+  "Lamine Yamal es el jugador más joven en marcar en una Eurocopa. ¡Solo tenía 16 años!",
+  "Rodri ganó el Balón de Oro en 2024. ¡El mejor jugador del mundo!",
+  "España ganó su primer Mundial en 2010 en Sudáfrica.",
+  "Pedri ganó el Trofeo Kopa como mejor jugador joven del mundo.",
+  "La camiseta roja de España se lleva desde 1920.",
+  "La selección española también se llama 'La Furia Española'.",
+  "España ganó la Eurocopa 2024 ganando todos sus partidos del torneo."
+];
+
+const JUGADORES=[
+  {nm:"Yamal",ps:"Extremo",em:"⚡"},
+  {nm:"Pedri",ps:"Centrocampista",em:"🎯"},
+  {nm:"Rodri",ps:"Pivote",em:"💪"},
+  {nm:"Morata",ps:"Delantero",em:"⚽"},
+  {nm:"Carvajal",ps:"Lateral",em:"🛡️"},
+  {nm:"Nico W.",ps:"Extremo",em:"🔥"}
+];
+
+/* ═══════════════════════════════════════
+   UTILIDADES
+═══════════════════════════════════════ */
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function playSound(type){
+  try{
+    const C=new(window.AudioContext||window.webkitAudioContext)();
+    if(type==='ok'){
+      [[523,0],[659,.12],[784,.24]].forEach(([f,t])=>{
+        const o=C.createOscillator(),g=C.createGain();
+        o.connect(g);g.connect(C.destination);o.frequency.value=f;
+        g.gain.setValueAtTime(.22,C.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(.001,C.currentTime+t+.32);
+        o.start(C.currentTime+t);o.stop(C.currentTime+t+.35);
+      });
+    }else if(type==='no'){
+      const o=C.createOscillator(),g=C.createGain();
+      o.type='sawtooth';o.connect(g);g.connect(C.destination);
+      o.frequency.setValueAtTime(280,C.currentTime);
+      o.frequency.linearRampToValueAtTime(160,C.currentTime+.35);
+      g.gain.setValueAtTime(.18,C.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,C.currentTime+.4);
+      o.start(C.currentTime);o.stop(C.currentTime+.4);
+    }else if(type==='win'){
+      [[392,0],[523,.14],[659,.28],[784,.42],[1047,.58]].forEach(([f,t])=>{
+        const o=C.createOscillator(),g=C.createGain();
+        o.connect(g);g.connect(C.destination);o.frequency.value=f;
+        g.gain.setValueAtTime(.28,C.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(.001,C.currentTime+t+.4);
+        o.start(C.currentTime+t);o.stop(C.currentTime+t+.45);
+      });
+    }
+  }catch(e){}
+}
+
+function loadProg(){try{return JSON.parse(localStorage.getItem('ml2')||'{}')}catch(e){return{}}}
+function saveProg(p){try{localStorage.setItem('ml2',JSON.stringify(p))}catch(e){}}
+function calcStars(c,t){const r=c/t;return r>=.9?3:r>=.6?2:1;}
+
+function spawnConfetti(){
+  const colors=['#C60B1E','#FFC400','#27ae60','#2196F3','#FF9800','#E91E63'];
+  for(let i=0;i<42;i++){
+    const el=document.createElement('div');
+    el.className='cf';
+    const c=colors[i%colors.length];
+    const w=6+Math.random()*10, h=6+Math.random()*14;
+    Object.assign(el.style,{
+      left:Math.random()*100+'vw', top:'-10px',
+      background:c, width:w+'px', height:h+'px',
+      borderRadius:Math.random()>.5?'50%':'2px',
+      animationDuration:(1.6+Math.random()*2)+'s',
+      animationDelay:(Math.random()*1.4)+'s'
+    });
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 5000);
+  }
+}
+
+/* ═══════════════════════════════════════
+   APP STATE & NAVIGATION
+═══════════════════════════════════════ */
+const APP={
+  screen:'home',
+  prog:loadProg(),
+  lastResult:null,
+  lastType:null
+};
+
+function navigate(scr){
+  APP.screen=scr;
+  const app=document.getElementById('app');
+  app.scrollTop=0;
+  renderApp();
+}
+
+function completeExercise(tipo,correctas,total,goles){
+  const stars=calcStars(correctas,total);
+  const prev=(APP.prog.estrellas||{})[tipo]||0;
+  APP.prog.goles=(APP.prog.goles||0)+goles;
+  APP.prog.estrellas={...(APP.prog.estrellas||{}),[tipo]:Math.max(prev,stars)};
+  saveProg(APP.prog);
+  APP.lastResult={correctas,total,goles,stars,tipo};
+  APP.lastType=tipo;
+  navigate('resultado');
+}
+
+/* ═══════════════════════════════════════
+   SHARED COMPONENTS
+═══════════════════════════════════════ */
+function hdrHTML(title,score,backScreen){
+  return `<div class="hdr">
+    ${backScreen?`<button class="hdr-back" onclick="navigate('${backScreen}')">←</button>`:`<div style="width:44px"></div>`}
+    <span class="hdr-title">${title}</span>
+    <div class="hdr-score">⚽ ${score}</div>
+  </div>`;
+}
+
+function progBarHTML(cur,tot){
+  return `<div class="prog-row">
+    <div class="prog-wrap"><div class="prog-fill" style="width:${Math.round(cur/tot*100)}%"></div></div>
+    <span class="prog-label">${cur}/${tot}</span>
+  </div>`;
+}
+
+function fbHTML(type,msg){
+  return `<div class="fb fb-${type}">
+    <span class="fb-emoji">${type==='ok'?'✅':'❌'}</span>
+    <span class="fb-text fb-text-${type}">${msg}</span>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════
+   HOME SCREEN
+═══════════════════════════════════════ */
+function renderHome(container){
+  const p=APP.prog;
+  const goles=p.goles||0;
+  const nivel=Math.floor(goles/100)+1;
+  const streak=p.streak||0;
+  const sets=Object.keys(p.estrellas||{}).length;
+  const pct=(goles%100);
+
+  // Update streak
+  const today=new Date().toDateString();
+  if(p.lastDate!==today){
+    const yesterday=new Date(Date.now()-86400000).toDateString();
+    p.streak=p.lastDate===yesterday?(p.streak||0)+1:1;
+    p.lastDate=today;
+    saveProg(p);
+  }
+
+  container.innerHTML=`
+  <div class="screen home-bg">
+    <div class="flag-bar"></div>
+    <div class="home-hero">
+      <span class="home-ball">⚽</span>
+      <div class="home-title">MÁXIMO LEE</div>
+      <div class="home-sub">¡Aprende con La Roja! 🇪🇸</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num">${goles}</div><div class="stat-lbl">⚽ Goles</div></div>
+      <div class="stat-box"><div class="stat-num">${nivel}</div><div class="stat-lbl">⭐ Nivel</div></div>
+      <div class="stat-box"><div class="stat-num">${streak}</div><div class="stat-lbl">🔥 Días</div></div>
+      <div class="stat-box"><div class="stat-num">${sets}</div><div class="stat-lbl">🏆 Sets</div></div>
+    </div>
+    <div class="home-lvl-card">
+      <div class="home-lvl-label">Nivel ${nivel} — Progreso</div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="home-prog-sub">${pct}/100 goles para el siguiente nivel</div>
+    </div>
+    <div style="padding:0 20px 10px">
+      <div style="color:rgba(255,255,255,.5);font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">⭐ Tu equipo favorito</div>
+    </div>
+    <div class="players-row">${JUGADORES.map(j=>`
+      <div class="p-card">
+        <div class="p-card-em">${j.em}</div>
+        <div class="p-card-nm">${j.nm}</div>
+        <div class="p-card-ps">${j.ps}</div>
+      </div>`).join('')}
+    </div>
+    <div class="home-cta">
+      <button class="btn btn-yellow btn-full" style="font-size:22px;padding:18px" onclick="navigate('menu')">🎮 ¡A JUGAR!</button>
+    </div>
+    <div class="home-tip">¡Hola, Máximo! ¿Listo para practicar hoy? 💪</div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════
+   MENU SCREEN
+═══════════════════════════════════════ */
+function renderMenu(container){
+  const p=APP.prog;
+  const goles=p.goles||0;
+  const est=p.estrellas||{};
+
+  function starsHTML(key){
+    const n=est[key]||0;
+    if(n===0) return '';
+    return `<div class="m-card-stars">${'⭐'.repeat(n)}${'☆'.repeat(3-n)}</div>`;
+  }
+
+  const cards=[
+    {k:'lectura',em:'📖',ti:'LEER',desc:'Textos de La Roja',cls:'m-c1',d:0},
+    {k:'completar',em:'✏️',ti:'COMPLETAR',desc:'Rellena los huecos',cls:'m-c2',d:50},
+    {k:'comprension',em:'🧠',ti:'COMPRENSIÓN',desc:'Responde preguntas',cls:'m-c3',d:100},
+    {k:'escritura',em:'🔤',ti:'ESCRIBIR',desc:'Forma las palabras',cls:'m-c4',d:150},
+    {k:'ordenar',em:'🔀',ti:'ORDENAR',desc:'Ordena las frases',cls:'m-c5',d:200},
+  ];
+
+  container.innerHTML=`
+  <div class="screen menu-bg">
+    ${hdrHTML('MÁXIMO LEE',goles,'home')}
+    <div class="menu-intro">
+      <div class="menu-intro-title">¿Qué practicamos hoy?</div>
+      <div class="menu-intro-sub">Elige un ejercicio y gana goles ⚽</div>
+    </div>
+    <div class="menu-grid">
+      ${cards.map(c=>`
+        <div class="m-card ${c.cls}" style="animation-delay:${c.d}ms" onclick="navigate('${c.k}')">
+          ${est[c.k]===3?`<div class="m-card-badge">✓ Perfecto</div>`:''}
+          <span class="m-card-em">${c.em}</span>
+          <div class="m-card-title">${c.ti}</div>
+          <div class="m-card-desc">${c.desc}</div>
+          ${starsHTML(c.k)}
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════
+   LECTURA SCREEN
+═══════════════════════════════════════ */
+class LecturaScreen {
+  constructor(container){
+    this.container=container;
+    this.idx=0;
+    this.leido=false;
+    this.render();
+  }
+  render(){
+    const t=LECTURAS[this.idx];
+    const goles=APP.prog.goles||0;
+    this.container.innerHTML=`
+    <div class="screen" style="background:#f5f0ff">
+      ${hdrHTML('📖 LECTURA',goles,'menu')}
+      <div class="ex-wrap">
+        ${progBarHTML(this.idx+1,LECTURAS.length)}
+        <div class="lect-card">
+          <div class="lect-hdr">
+            <div class="lect-hdr-em">${t.emoji}</div>
+            <div class="lect-hdr-title">${t.titulo}</div>
+          </div>
+          <div class="lect-body">${t.texto}</div>
+        </div>
+        ${!this.leido
+          ?`<button class="btn btn-red btn-full" id="lect-btn">✅ He terminado de leer</button>`
+          :`<div style="background:#f0fff4;border:2px solid #27ae60;border-radius:14px;padding:14px;text-align:center;margin-bottom:14px;animation:fadeUp .3s ease">
+              <div style="font-size:26px">🎉</div>
+              <div style="font-weight:800;font-size:17px;color:#27ae60">¡Genial! +8 goles por leer</div>
+            </div>
+            <button class="btn btn-yellow btn-full" id="lect-btn">${this.idx<LECTURAS.length-1?'➡️ Siguiente texto':'🏆 ¡Terminar!'}</button>`
+        }
+      </div>
+    </div>`;
+    document.getElementById('lect-btn').onclick=()=>{
+      if(!this.leido){this.leido=true;this.render();}
+      else{
+        if(this.idx<LECTURAS.length-1){this.idx++;this.leido=false;this.render();}
+        else{completeExercise('lectura',LECTURAS.length,LECTURAS.length,LECTURAS.length*8);}
+      }
+    };
+  }
+}
+
+/* ═══════════════════════════════════════
+   COMPLETAR SCREEN
+═══════════════════════════════════════ */
+class CompletarScreen {
+  constructor(container){
+    this.container=container;
+    this.items=shuffle(COMPLETAR).slice(0,10);
+    this.idx=0;
+    this.correctas=0;
+    this.sel=null;
+    this.feedback=null;
+    this.intentos=0;
+    this.render();
+  }
+  render(){
+    const it=this.items[this.idx];
+    const goles=APP.prog.goles||0;
+    const blank=this.sel
+      ?`<span style="display:inline-block;min-width:110px;border-bottom:3px solid ${this.sel===it.ok?'#27ae60':'#C60B1E'};color:${this.sel===it.ok?'#27ae60':'#C60B1E'};font-weight:900;padding:0 7px">${this.sel}</span>`
+      :`<span style="display:inline-block;min-width:110px;border-bottom:3px solid #aaa;padding:0 7px;color:transparent">___</span>`;
+    this.container.innerHTML=`
+    <div class="screen" style="background:#f5f0ff">
+      ${hdrHTML('✏️ COMPLETAR',goles,'menu')}
+      <div class="ex-wrap">
+        ${progBarHTML(this.idx+1,this.items.length)}
+        <div class="q-box ${this.feedback==='ok'?'':this.feedback==='no'?'':''}" id="qbox">
+          <span class="q-emoji">${it.em}</span>
+          <div class="q-text">${it.a} ${blank} ${it.d}</div>
+        </div>
+        ${this.feedback?fbHTML(this.feedback,this.feedback==='ok'?'¡Correcto! +10 goles ⚽':this.intentos>=1?`La respuesta es: "${it.ok}"`:'¡Inténtalo de nuevo! 💪'):''}
+        <div class="opt-list">
+          ${it.opts.map(op=>`<button class="opt ${this.sel===op&&op===it.ok?'opt-ok':''} ${this.sel===op&&op!==it.ok?'opt-no':''} ${this.sel!==null?'opt-off':''}" data-op="${op}">${op}</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+    this.container.querySelectorAll('.opt').forEach(b=>{
+      b.onclick=()=>this.pick(b.dataset.op);
+    });
+    if(this.feedback==='ok'){const q=document.getElementById('qbox');if(q)q.style.animation='popIn .35s ease';}
+    if(this.feedback==='no'){const q=document.getElementById('qbox');if(q)q.style.animation='shake .4s ease';}
+  }
+  pick(op){
+    if(this.sel!==null) return;
+    const it=this.items[this.idx];
+    const ok=op===it.ok;
+    this.sel=op;
+    this.feedback=ok?'ok':'no';
+    if(ok){playSound('ok');this.correctas++;}
+    else{playSound('no');this.intentos++;}
+    this.render();
+    setTimeout(()=>{
+      if(ok||this.intentos>=1){
+        if(this.idx<this.items.length-1){this.idx++;this.sel=null;this.feedback=null;this.intentos=0;this.render();}
+        else{completeExercise('completar',this.correctas,this.items.length,this.correctas*10);}
+      }else{this.sel=null;this.feedback=null;this.render();}
+    },ok?900:1100);
+  }
+}
+
+/* ═══════════════════════════════════════
+   COMPRENSION SCREEN
+═══════════════════════════════════════ */
+class ComprensionScreen {
+  constructor(container){
+    this.container=container;
+    this.textos=shuffle(COMPRENSION);
+    this.ti=0; // texto index
+    this.pi=-1; // pregunta index (-1=leyendo)
+    this.correctas=0;
+    this.sel=null;
+    this.feedback=null;
+    this.intentos=0;
+    this.render();
+  }
+  get totalQ(){return this.textos.reduce((s,t)=>s+t.preguntas.length,0);}
+  get progQ(){return this.textos.slice(0,this.ti).reduce((s,t)=>s+t.preguntas.length,0)+(this.pi>=0?this.pi:0);}
+  render(){
+    const tx=this.textos[this.ti];
+    const goles=APP.prog.goles||0;
+    if(this.pi===-1){
+      this.container.innerHTML=`
+      <div class="screen" style="background:#f5f0ff">
+        ${hdrHTML('🧠 COMPRENSIÓN',goles,'menu')}
+        <div class="ex-wrap">
+          ${progBarHTML(this.progQ,this.totalQ)}
+          <div style="text-align:center;margin-bottom:16px;animation:fadeUp .4s ease">
+            <div style="font-size:46px">${tx.emoji}</div>
+            <div style="font-size:21px;font-weight:900;margin:7px 0">${tx.titulo}</div>
+            <div style="font-size:14px;color:#888;font-weight:600">Lee el texto y responde las preguntas</div>
+          </div>
+          <div class="read-box"><p>${tx.texto}</p></div>
+          <button class="btn btn-red btn-full" id="start-btn">🧠 Responder preguntas</button>
+        </div>
+      </div>`;
+      document.getElementById('start-btn').onclick=()=>{this.pi=0;this.render();};
+    } else {
+      const preg=tx.preguntas[this.pi];
+      this.container.innerHTML=`
+      <div class="screen" style="background:#f5f0ff">
+        ${hdrHTML('🧠 COMPRENSIÓN',goles,'menu')}
+        <div class="ex-wrap" style="animation:slideIn .35s ease">
+          ${progBarHTML(this.progQ+1,this.totalQ)}
+          <div class="q-box" id="qbox">
+            <div class="q-section-label">Pregunta ${this.pi+1} de ${tx.preguntas.length}</div>
+            <div class="q-text">${preg.q}</div>
+          </div>
+          ${this.feedback?fbHTML(this.feedback,this.feedback==='ok'?'¡Correcto! +8 goles ⚽':this.intentos>=1?`La respuesta es: "${preg.ok}"`:'¡Inténtalo de nuevo! 💪'):''}
+          <div class="opt-list">
+            ${preg.opts.map(op=>`<button class="opt ${this.sel===op&&op===preg.ok?'opt-ok':''} ${this.sel===op&&op!==preg.ok?'opt-no':''} ${this.sel!==null?'opt-off':''}" data-op="${op}">${op}</button>`).join('')}
+          </div>
+        </div>
+      </div>`;
+      if(this.feedback==='ok'){const q=document.getElementById('qbox');if(q)q.style.animation='popIn .35s ease';}
+      if(this.feedback==='no'){const q=document.getElementById('qbox');if(q)q.style.animation='shake .4s ease';}
+      this.container.querySelectorAll('.opt').forEach(b=>{b.onclick=()=>this.pick(b.dataset.op);});
+    }
+  }
+  pick(op){
+    if(this.sel!==null) return;
+    const preg=this.textos[this.ti].preguntas[this.pi];
+    const ok=op===preg.ok;
+    this.sel=op;this.feedback=ok?'ok':'no';
+    if(ok){playSound('ok');this.correctas++;}else{playSound('no');this.intentos++;}
+    this.render();
+    setTimeout(()=>{
+      if(ok||this.intentos>=1){
+        const nextP=this.pi+1;
+        if(nextP<this.textos[this.ti].preguntas.length){
+          this.pi=nextP;this.sel=null;this.feedback=null;this.intentos=0;this.render();
+        } else {
+          const nextT=this.ti+1;
+          if(nextT<this.textos.length){
+            this.ti=nextT;this.pi=-1;this.sel=null;this.feedback=null;this.intentos=0;this.render();
+          } else {
+            completeExercise('comprension',this.correctas,this.totalQ,this.correctas*8);
+          }
+        }
+      } else {this.sel=null;this.feedback=null;this.render();}
+    },ok?900:1100);
+  }
+}
+
+/* ═══════════════════════════════════════
+   ESCRITURA SCREEN (LETTER TILES)
+═══════════════════════════════════════ */
+class EscrituraScreen {
+  constructor(container){
+    this.container=container;
+    this.words=shuffle(PALABRAS).slice(0,8);
+    this.wi=0;
+    this.correctas=0;
+    this.intentos=0;
+    this.submitted=false;
+    this.feedback=null;
+    this.initWord();
+  }
+  initWord(){
+    const w=this.words[this.wi];
+    const letters=w.p.split('');
+    this.answer=new Array(letters.length).fill(null); // null or tileId
+    this.tiles=shuffle(letters).map((l,i)=>({id:i,l,used:false}));
+    this.submitted=false;
+    this.feedback=null;
+    this.render();
+  }
+  render(){
+    const w=this.words[this.wi];
+    const goles=APP.prog.goles||0;
+    const slotsHTML=this.answer.map((tid,i)=>{
+      const l=tid!==null?this.tiles[tid].l.toUpperCase():'';
+      let cls='slot'+(tid!==null?' filled':'');
+      if(this.submitted&&this.feedback==='ok') cls+=' s-ok';
+      if(this.submitted&&this.feedback==='no') cls+=' s-no';
+      return `<div class="${cls}" data-slot="${i}">${l}</div>`;
+    }).join('');
+    const tilesHTML=this.tiles.map(t=>`<div class="tile${t.used?' used':''}" data-tile="${t.id}">${t.l.toUpperCase()}</div>`).join('');
+    const allFilled=this.answer.every(a=>a!==null);
+    this.container.innerHTML=`
+    <div class="screen" style="background:#f5f0ff">
+      ${hdrHTML('🔤 ESCRIBIR',goles,'menu')}
+      <div class="ex-wrap">
+        ${progBarHTML(this.wi+1,this.words.length)}
+        <div class="q-box" style="text-align:center">
+          <span class="q-emoji">${w.em}</span>
+          <div class="q-text">${w.pista}</div>
+          <div class="q-hint">${w.p.length} letras</div>
+        </div>
+        <div class="slots-wrap" id="slots">${slotsHTML}</div>
+        ${this.feedback?fbHTML(this.feedback,this.feedback==='ok'?'¡Perfecto! +10 goles ⚽':this.intentos>=1?`La palabra es: "${w.p}"`:'¡Casi! Inténtalo de nuevo 💪'):''}
+        ${!this.submitted?`<div class="tiles-wrap" id="tiles">${tilesHTML}</div>`:''}
+        ${!this.submitted?`<button class="btn btn-full ${allFilled?'btn-green':'btn-gray'}" id="check-btn">✅ Comprobar</button>`:''}
+      </div>
+    </div>`;
+    this.container.querySelectorAll('.tile').forEach(el=>{
+      el.onclick=()=>this.tapTile(parseInt(el.dataset.tile));
+    });
+    this.container.querySelectorAll('.slot').forEach(el=>{
+      el.onclick=()=>this.tapSlot(parseInt(el.dataset.slot));
+    });
+    const cb=document.getElementById('check-btn');
+    if(cb) cb.onclick=()=>this.check();
+  }
+  tapTile(id){
+    if(this.submitted) return;
+    const t=this.tiles[id];
+    if(t.used) return;
+    const next=this.answer.indexOf(null);
+    if(next===-1) return;
+    t.used=true;
+    this.answer[next]=id;
+    this.updateSlotsAndTiles();
+  }
+  tapSlot(idx){
+    if(this.submitted) return;
+    const tid=this.answer[idx];
+    if(tid===null) return;
+    this.tiles[tid].used=false;
+    this.answer[idx]=null;
+    this.updateSlotsAndTiles();
+  }
+  updateSlotsAndTiles(){
+    // Targeted updates
+    this.answer.forEach((tid,i)=>{
+      const el=this.container.querySelector(`.slot[data-slot="${i}"]`);
+      if(!el) return;
+      if(tid!==null){el.textContent=this.tiles[tid].l.toUpperCase();el.classList.add('filled');}
+      else{el.textContent='';el.classList.remove('filled');}
+    });
+    this.tiles.forEach(t=>{
+      const el=this.container.querySelector(`.tile[data-tile="${t.id}"]`);
+      if(!el) return;
+      el.classList.toggle('used',t.used);
+    });
+    const allFilled=this.answer.every(a=>a!==null);
+    const cb=document.getElementById('check-btn');
+    if(cb){cb.className=`btn btn-full ${allFilled?'btn-green':'btn-gray'}`;cb.style.pointerEvents=allFilled?'':'none';}
+  }
+  check(){
+    const formed=this.answer.map(tid=>tid!==null?this.tiles[tid].l:'').join('');
+    const ok=formed===this.words[this.wi].p;
+    this.submitted=true;
+    this.feedback=ok?'ok':'no';
+    if(ok){playSound('ok');this.correctas++;}else{playSound('no');this.intentos++;}
+    this.render();
+    setTimeout(()=>{
+      if(ok||this.intentos>=1){
+        if(this.wi<this.words.length-1){this.wi++;this.intentos=0;this.initWord();}
+        else{completeExercise('escritura',this.correctas,this.words.length,this.correctas*10);}
+      }else{this.initWord();}
+    },ok?1000:1200);
+  }
+}
+
+/* ═══════════════════════════════════════
+   ORDENAR SCREEN
+═══════════════════════════════════════ */
+class OrdenarScreen {
+  constructor(container){
+    this.container=container;
+    this.frases=shuffle(FRASES).slice(0,8);
+    this.fi=0;
+    this.correctas=0;
+    this.intentos=0;
+    this.submitted=false;
+    this.feedback=null;
+    this.initFrase();
+  }
+  initFrase(){
+    const f=this.frases[this.fi];
+    this.avail=shuffle(f.ws).map((w,i)=>({id:i,w,placed:false}));
+    this.placed=[];
+    this.submitted=false;
+    this.feedback=null;
+    this.render();
+  }
+  render(){
+    const goles=APP.prog.goles||0;
+    const sentHTML=this.placed.length===0
+      ?`<span class="sentence-placeholder">Toca las palabras en orden...</span>`
+      :this.placed.map((tok,i)=>{
+          let cls=`wtoken wt-placed`;
+          if(this.submitted&&this.feedback==='ok') cls='wtoken wt-ok';
+          if(this.submitted&&this.feedback==='no') cls='wtoken wt-no';
+          return `<div class="${cls}" data-pidx="${i}">${tok.w}</div>`;
+        }).join('');
+    const availHTML=this.avail.map(tok=>`<div class="wtoken wt-avail${tok.placed?' wt-hidden':''}" data-aid="${tok.id}">${tok.w}</div>`).join('');
+    const allPlaced=this.avail.every(t=>t.placed);
+    this.container.innerHTML=`
+    <div class="screen" style="background:#f5f0ff">
+      ${hdrHTML('🔀 ORDENAR',goles,'menu')}
+      <div class="ex-wrap">
+        ${progBarHTML(this.fi+1,this.frases.length)}
+        <div class="q-box" style="text-align:center">
+          <span class="q-emoji">🔀</span>
+          <div class="q-text">Ordena las palabras para formar una frase correcta</div>
+        </div>
+        <div class="sentence-area" id="sent">${sentHTML}</div>
+        ${this.feedback?fbHTML(this.feedback,this.feedback==='ok'?'¡Perfecto! +10 goles ⚽':this.intentos>=1?`La frase es: "${this.frases[this.fi].f}"`:'¡Casi! Inténtalo de nuevo 💪'):''}
+        ${!this.submitted?`<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px" id="avail">${availHTML}</div>`:''}
+        ${!this.submitted?`<div class="ordenar-btns">
+          <button class="btn btn-outline-w" style="flex:1;background:rgba(0,0,0,.08);color:#555;border:2px solid #ccc;box-shadow:none" id="reset-btn">🔄 Borrar</button>
+          <button class="btn ${allPlaced?'btn-green':'btn-gray'}" style="flex:2" id="check-btn">✅ Comprobar</button>
+        </div>`:''}
+      </div>
+    </div>`;
+    this.container.querySelectorAll('[data-aid]').forEach(el=>{el.onclick=()=>this.tapAvail(parseInt(el.dataset.aid));});
+    this.container.querySelectorAll('[data-pidx]').forEach(el=>{el.onclick=()=>this.tapPlaced(parseInt(el.dataset.pidx));});
+    const rb=document.getElementById('reset-btn');
+    if(rb) rb.onclick=()=>{this.placed=[];this.avail.forEach(t=>t.placed=false);this.render();};
+    const cb=document.getElementById('check-btn');
+    if(cb) cb.onclick=()=>this.check();
+  }
+  tapAvail(id){
+    if(this.submitted) return;
+    const tok=this.avail.find(t=>t.id===id);
+    if(!tok||tok.placed) return;
+    tok.placed=true;
+    this.placed.push({...tok});
+    this.render();
+  }
+  tapPlaced(idx){
+    if(this.submitted) return;
+    const tok=this.placed[idx];
+    const orig=this.avail.find(t=>t.id===tok.id);
+    if(orig) orig.placed=false;
+    this.placed.splice(idx,1);
+    this.render();
+  }
+  check(){
+    const formed=this.placed.map(t=>t.w).join(' ');
+    const ok=formed===this.frases[this.fi].f;
+    this.submitted=true;
+    this.feedback=ok?'ok':'no';
+    if(ok){playSound('ok');this.correctas++;}else{playSound('no');this.intentos++;}
+    this.render();
+    setTimeout(()=>{
+      if(ok||this.intentos>=1){
+        if(this.fi<this.frases.length-1){this.fi++;this.intentos=0;this.initFrase();}
+        else{completeExercise('ordenar',this.correctas,this.frases.length,this.correctas*10);}
+      }else{this.initFrase();}
+    },ok?1000:1200);
+  }
+}
+
+/* ═══════════════════════════════════════
+   RESULTADO SCREEN
+═══════════════════════════════════════ */
+function renderResultado(container){
+  const r=APP.lastResult;
+  const tipo=APP.lastType;
+  const stars=r.stars;
+  const fact=FUN_FACTS[Math.floor(Math.random()*FUN_FACTS.length)];
+  const msgs=[
+    ['¡INCREÍBLE! 🔥','¡Eres un crack! La Roja te fichará pronto 🇪🇸'],
+    ['¡MUY BIEN! 🏆','¡Sigue así y serás campeón! ⭐'],
+    ['¡BIEN! 💪','¡Practica un poco más y lo conseguirás!']
+  ];
+  const [ti,su]=msgs[3-stars]||msgs[2];
+
+  container.innerHTML=`
+  <div class="screen res-bg">
+    <div class="res-em">${stars===3?'🏆':stars===2?'🥈':'⭐'}</div>
+    <div class="res-title">${ti}</div>
+    <div class="res-sub">${su}</div>
+    <div class="stars-row">
+      ${[1,2,3].map((s,i)=>`<span class="star${s>stars?' star-off':''}" style="animation-delay:${i*.2}s">⭐</span>`).join('')}
+    </div>
+    <div class="score-detail">${r.correctas} de ${r.total} correctas</div>
+    <div class="goles-badge">+${r.goles} ⚽ Goles</div>
+    <div class="fact-box">
+      <div class="fact-label">💡 ¿Sabías que...?</div>
+      <div class="fact-text">${fact}</div>
+    </div>
+    <div class="res-btns">
+      <button class="btn btn-yellow btn-full" onclick="navigate('menu')">🏠 Menú principal</button>
+      <button class="btn btn-outline-w btn-full" onclick="navigate('${tipo}')">🔄 Repetir ejercicio</button>
+    </div>
+  </div>`;
+
+  if(stars>=3) setTimeout(spawnConfetti,200);
+  playSound('win');
+}
+
+/* ═══════════════════════════════════════
+   MAIN RENDER
+═══════════════════════════════════════ */
+function renderApp(){
+  const app=document.getElementById('app');
+  app.innerHTML='';
+  switch(APP.screen){
+    case 'home':      renderHome(app); break;
+    case 'menu':      renderMenu(app); break;
+    case 'lectura':   new LecturaScreen(app); break;
+    case 'completar': new CompletarScreen(app); break;
+    case 'comprension':new ComprensionScreen(app); break;
+    case 'escritura': new EscrituraScreen(app); break;
+    case 'ordenar':   new OrdenarScreen(app); break;
+    case 'resultado': renderResultado(app); break;
+    default:          renderHome(app);
+  }
+}
+
+// Arrancar
+renderApp();
+
+// ── SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
