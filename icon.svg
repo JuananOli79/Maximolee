@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C60B1E"/>
+      <stop offset="100%" stop-color="#8b000f"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <text x="256" y="210" font-family="Arial Black, sans-serif" font-weight="900"
+        font-size="160" fill="#FFC400" text-anchor="middle">M</text>
+  <text x="256" y="370" font-family="Arial Black, sans-serif" font-weight="900"
+        font-size="90" fill="#FFFFFF" text-anchor="middle">LEE ⚽</text>
+</svg>
